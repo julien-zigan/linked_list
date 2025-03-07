@@ -1,50 +1,67 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define STR_BUF 255
+typedef struct company_t{
+   struct company_t *next;
+   char name[255];
+   int priority;
 
-typedef struct company{
-    struct company *next;
-    char name[STR_BUF];
-    int priority;
+} COMPANY;
 
-} company_t;
-
-company_t *new_company() 
+COMPANY *new_company() 
 {
-    company_t *new = malloc(sizeof(company_t));
-    printf("Enter company name: ");
-    scanf("%255s", new->name);
+    COMPANY *new = (COMPANY *) malloc(sizeof(COMPANY));
+    new->next = NULL;
+    printf("Name: ");
+    scanf("%10s", new->name);
     while(getchar() != '\n');
-    printf("Enter priority: ");
+    printf("Priority: ");
     scanf("%2i", &new->priority);
     return new;
 }
 
-int insert(company_t* list, company_t *item)
+int insert(COMPANY *list,COMPANY *item)
 {
-    if (item == NULL) {
-        fprintf(stderr, "No valid company item was passed");
-        return -1;
+    int i = 0;
+    if (list == NULL)
+        fprintf(stderr, "no list passed\n");
+    else {
+        COMPANY *tmp = list;
+        while (tmp->next) {
+            if (tmp->next->priority > item->priority) {
+                item->next = tmp->next;
+                tmp->next = item;
+                return ++i;
+            }
+            i++;
+            tmp = tmp->next;
+        }   
+       tmp->next = item; 
+       return ++i;
     }
-    /* case: list empty */
-    if (list == NULL) {
-        list = item;
-    }
-    /* case: only one item in list */
-    else if (list->next == NULL) {
-            if (list->priorty > item->priority) {
-                item->next = list;
-                list = item;
-    }
-   return EXIT_SUCCESS;
 }
 
-int main()
+int print_list(COMPANY *list) 
 {
-    company_t *list = NULL;
-    company_t *item = new_company();
-    insert(list, item);
+    COMPANY *reader = list;
+    while (reader->next) {
+       printf("%s\t%i\tNext: %p\n", 
+                reader->next->name, reader->next->priority, reader->next->next);
+        reader = reader->next;
+    }
+}
 
+
+int main(void)
+{
+    COMPANY *head = malloc(sizeof(COMPANY));
+    head->next = NULL;
+    for (int i = 0; i < 4; i++) {
+        COMPANY *item = new_company();
+        int pos = insert(head, item);
+        printf("%i\n", pos);
+    }
+    print_list(head);
     return EXIT_SUCCESS;
 }
